@@ -1,0 +1,62 @@
+{
+    "name": "css-modules-dts-loader",
+    "version": "1.0.4",
+    "description": "A Webpack loader that generates TypeScript declaration files (.d.ts) for CSS modules.",
+    "main": "src/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Ch-Valentine/css-modules-dts-loader.git"
+    },
+    "keywords": [
+        "webpack",
+        "loader",
+        "css",
+        "modules",
+        "typescript",
+        "dts"
+    ],
+    "author": "Ch-Valentine <senioro.work@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Ch-Valentine/css-modules-dts-loader/issues"
+    },
+    "homepage": "https://github.com/Ch-Valentine/css-modules-dts-loader#readme",
+    "scripts": {
+        "test": "jest --coverage",
+        "lint": "eslint src/*.js",
+        "prepublishOnly": "pnpm run test"
+    },
+    "files": [
+        "src"
+    ],
+    "dependencies": {
+        "schema-utils": "^3.3.0"
+    },
+    "peerDependencies": {
+        "webpack": ">=5"
+    },
+    "devDependencies": {
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.13.1",
+        "@typescript-eslint/eslint-plugin": "^8.23.0",
+        "@typescript-eslint/parser": "^8.23.0",
+        "css-loader": "^7.1.2",
+        "eslint": "^9.20.0",
+        "jest": "^29.7.0",
+        "memfs": "^4.17.0",
+        "ts-jest": "^29.2.5",
+        "typescript": "^5.7.3",
+        "webpack": "^5.97.1"
+    },
+    "jest": {
+        "preset": "ts-jest",
+        "testEnvironment": "node",
+        "moduleNameMapper": {
+            "\\.css$": "<rootDir>/test/__mocks__/styleMock.js"
+        },
+        "collectCoverageFrom": [
+            "src/**/*.{js,ts}",
+            "!src/**/*.d.ts"
+        ]
+    }
+}
