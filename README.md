@@ -63,13 +63,13 @@ module.exports = {
                {
                   loader: require.resolve("css-loader"),
                   options: {
-                        sourceMap: true,
-                        modules: {
-                           namedExport: isNamedExport,
-                           exportLocalsConvention: "as-is",
-                           localIdentName: "[name]__[local]___[hash:base64]"
-                        },
-                        importLoaders: 1
+                     sourceMap: true,
+                     modules: {
+                        namedExport: isNamedExport,
+                        exportLocalsConvention: "as-is",
+                        localIdentName: "[name]__[local]___[hash:base64]"
+                     },
+                     importLoaders: 1
                   }
                }
             ]
