@@ -4,7 +4,7 @@
 [![npm](https://img.shields.io/npm/dw/css-modules-dts-loader)](https://www.npmjs.com/package/css-modules-dts-loader)
 [![license](https://img.shields.io/npm/l/css-modules-dts-loader)](https://github.com/Ch-Valentine/css-modules-dts-loader/blob/develop/LICENSE)
 
-A Webpack loader for generating TypeScript declaration files (`.d.ts`) for CSS Modules.
+A Rspack and Webpack loader for generating TypeScript declaration files (`.d.ts`) for CSS Modules.
 
 ## Overview
 
