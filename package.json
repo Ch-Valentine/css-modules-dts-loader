@@ -46,9 +46,9 @@
 		"prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
 	},
 	"files": [
-		"dist",
-		"src"
+		"dist"
 	],
+	"packageManager": "pnpm@10.24.0",
 	"dependencies": {
 		"schema-utils": "^4.3.3"
 	},

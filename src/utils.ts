@@ -308,20 +308,13 @@ export function generateDtsContent({ classNames, options }: GenerateDtsContentPa
 			""
 		);
 
-		// When we have keywords, use 'export =' to export all properties
+		// Export the interface as default export
 		// This allows importing like: import styles from './file.css'
-		// and accessing keywords like: styles.class
-		if (hasKeywords) {
-			content.push(
-				"export const cssExports: CssExports;",
-				"export = cssExports;"
-			);
-		} else {
-			content.push(
-				"export const cssExports: CssExports;",
-				"export default cssExports;"
-			);
-		}
+		// and accessing all properties including keywords like: styles.class
+		content.push(
+			"export const cssExports: CssExports;",
+			"export default cssExports;"
+		);
 	}
 
 	return content.join("\n") + "\n";

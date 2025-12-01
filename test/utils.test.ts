@@ -214,7 +214,7 @@ describe("utils", () => {
 			expect(result).toContain('"class"');
 			expect(result).toContain('"export"');
 			expect(result).toContain('"validName"');
-			expect(result).toContain("export = cssExports;");
+			expect(result).toContain("export default cssExports;");
 		});
 
 		test("should use default export when namedExport=false and no keywords", () => {
