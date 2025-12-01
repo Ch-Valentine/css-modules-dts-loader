@@ -15,7 +15,7 @@ Thank you for considering contributing to **css-modules-dts-loader**! Your contr
 
 ## Reporting Issues
 
-If you find a bug or encounter any problems, please help us improve the project by reporting the issue on our [GitHub Issues](https://github.com/yourusername/css-modules-dts-loader/issues) page.
+If you find a bug or encounter any problems, please help us improve the project by reporting the issue on our [GitHub Issues](https://github.com/Ch-Valentine/css-modules-dts-loader/issues) page.
 
 ### How to Report an Issue
 
