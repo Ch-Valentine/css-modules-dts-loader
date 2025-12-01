@@ -76,5 +76,10 @@
 		"typescript": "^5.9.3",
 		"vitest": "^4.0.14",
 		"webpack": "^5.103.0"
-	}
+	},
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
+    }
 }
