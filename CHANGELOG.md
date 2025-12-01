@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.2.0...v1.2.1) (2025-12-01)
+
+
+### Bug Fixes
+
+* incorrect types default export declaration ([f7825c7](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/f7825c75525f5cca10ac01fc88696b230dbb6678))
+
 # [1.2.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.1.0...v1.2.0) (2025-12-01)
 
 
