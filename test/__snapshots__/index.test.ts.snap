@@ -23,7 +23,7 @@ interface CssExports {
 }
 
 export const cssExports: CssExports;
-export = cssExports;
+export default cssExports;
 "
 `;
 
@@ -38,7 +38,7 @@ interface CssExports {
 }
 
 export const cssExports: CssExports;
-export = cssExports;
+export default cssExports;
 "
 `;
 
