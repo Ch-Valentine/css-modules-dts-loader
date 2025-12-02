@@ -243,11 +243,12 @@ describe("css-modules-dts-loader", () => {
 			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
 			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
 
-			// Should contain all class names
-			expect(dtsContent).toContain("class");
-			expect(dtsContent).toContain("export");
-			expect(dtsContent).toContain("import");
-			expect(dtsContent).toContain("validClass");
+			// With namedExport=true, css-loader only exports valid identifiers
+			// Keywords like 'class', 'export', 'import' are not exported and thus not typed
+			expect(dtsContent).toContain("export const validClass: string;");
+			expect(dtsContent).not.toContain("export const class:");
+			expect(dtsContent).not.toContain("export const export:");
+			expect(dtsContent).not.toContain("export const import:");
 		});
 
 		it("should handle JS keyword class names with namedExport=false", async () => {
