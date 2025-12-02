@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.2.1...v1.3.0) (2025-12-02)
+
+
+### Bug Fixes
+
+* remove useless npm lockfile ([f1c9bf8](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/f1c9bf81117519f6e0cc5060c226774499552041))
+
+
+### Features
+
+* add exportLocalsConvention support and fix keyword handling ([23dacbb](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/23dacbb41f77115ad323cd87b3c49e8840c5a6d0))
+
 ## [1.2.1](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.2.0...v1.2.1) (2025-12-01)
 
 
