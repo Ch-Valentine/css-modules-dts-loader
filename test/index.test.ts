@@ -243,11 +243,21 @@ describe("css-modules-dts-loader", () => {
 			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
 			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
 
+			// Should contain normal export for non-keywords
 			expect(dtsContent).toContain("export const validClass: string;");
 
+			// Should NOT contain keywords as direct named exports
 			expect(dtsContent).not.toContain("export const class: string;");
 			expect(dtsContent).not.toContain("export const export: string;");
 			expect(dtsContent).not.toContain("export const import: string;");
+
+			// Should contain aliased exports for keywords
+			expect(dtsContent).toContain("declare const __dts_class: string;");
+			expect(dtsContent).toContain("declare const __dts_export: string;");
+			expect(dtsContent).toContain("declare const __dts_import: string;");
+			expect(dtsContent).toContain('export { __dts_class as "class" };');
+			expect(dtsContent).toContain('export { __dts_export as "export" };');
+			expect(dtsContent).toContain('export { __dts_import as "import" };');
 		});
 
 		it("should handle JS keyword class names with namedExport=false", async () => {
