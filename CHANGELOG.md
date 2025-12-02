@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.3.0...v1.4.0) (2025-12-02)
+
+
+### Features
+
+* support js keywords for named export ([bc655d5](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/bc655d598327509f8a2cceee90a8d0d233b6e714))
+
 # [1.3.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.2.1...v1.3.0) (2025-12-02)
 
 
