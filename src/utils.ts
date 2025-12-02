@@ -319,11 +319,11 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  * 1. Applies exportLocalsConvention transformation (or legacy camelCase)
  * 2. Sorts class names alphabetically if enabled
  * 3. Checks for JavaScript reserved keywords in class names
- * 4. Chooses appropriate export format based on options and keyword detection
+ * 4. Chooses appropriate export format based on options
  * 5. Formats the output with custom indentation and quotes
  *
  * Export format selection:
- * - If namedExport=true: generates named exports for non-keyword classes only (keywords are skipped)
+ * - If namedExport=true: generates named exports for non-keyword classes, aliased exports for keywords
  * - If namedExport=false: generates interface + default export with all classes
  *
  * @param params - Parameters object
@@ -342,13 +342,16 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  * // export const button: string;
  * // export const container: string;
  *
- * // Named exports with keywords (keywords are skipped)
+ * // Named exports with keywords (keywords use aliased exports)
  * generateDtsContent({
  *   classNames: ["class", "button"],
  *   options: { namedExport: true, exportLocalsConvention: "as-is", ... }
  * });
  * // Returns:
  * // export const button: string;
+ * //
+ * // declare const __dts_class: string;
+ * // export { __dts_class as "class" };
  * ```
  */
 export function generateDtsContent({ classNames, options }: GenerateDtsContentParams): string {
@@ -375,13 +378,20 @@ export function generateDtsContent({ classNames, options }: GenerateDtsContentPa
 	}
 
 	// Separate keywords from non-keywords
+	const keywords = processedClassNames.filter(cls => JS_KEYWORDS.has(cls));
 	const nonKeywords = processedClassNames.filter(cls => !JS_KEYWORDS.has(cls));
 
 	if (options.namedExport) {
-		// namedExport:true - only export non-keyword classes as named exports
-		// Keywords are skipped because they cannot be used as named exports in JavaScript
-		// Users can still access them via import * as styles and styles["keyword"]
+		// namedExport:true - export non-keyword classes directly
 		content.push(...nonKeywords.map(cls => `export const ${cls}: string;`));
+
+		// For keywords, use aliased exports to provide type safety
+		// declare const __dts_class: string; export { __dts_class as "class" };
+		if (keywords.length > 0) {
+			content.push("");
+			content.push(...keywords.map(cls => `declare const __dts_${cls}: string;`));
+			content.push(...keywords.map(cls => `export { __dts_${cls} as "${cls}" };`));
+		}
 	} else {
 		// namedExport:false - always use interface format
 		content.push(

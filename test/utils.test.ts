@@ -194,7 +194,7 @@ describe("utils", () => {
 			expect(result).toContain("export const test: string;");
 		});
 
-		test("should skip keywords when namedExport=true", () => {
+		test("should use aliased exports for keywords when namedExport=true", () => {
 			const result = generateDtsContent({
 				classNames: ["class", "export", "validName"],
 				options: {
@@ -209,10 +209,19 @@ describe("utils", () => {
 				}
 			});
 
-			// Should only export non-keyword classes
+			// Should export non-keyword classes normally
 			expect(result).toContain("export const validName: string;");
+
+			// Should NOT export keywords as named exports directly
 			expect(result).not.toContain("export const class");
 			expect(result).not.toContain("export const export");
+
+			// Should use aliased exports for keywords
+			expect(result).toContain("declare const __dts_class: string;");
+			expect(result).toContain("declare const __dts_export: string;");
+			expect(result).toContain('export { __dts_class as "class" };');
+			expect(result).toContain('export { __dts_export as "export" };');
+
 			expect(result).not.toContain("interface");
 		});
 
@@ -280,6 +289,36 @@ describe("utils", () => {
 			expect(result).toContain("kebabCaseName");
 			expect(result).toContain("anotherClass");
 			expect(result).not.toContain("kebab-case-name");
+		});
+
+		test("should handle collision with __dts_ prefix (class name starting with __dts_)", () => {
+			const result = generateDtsContent({
+				classNames: ["__dts_class", "class", "normalClass"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: false,
+					namedExport: true,
+					mode: "emit",
+					banner: "// Test"
+				}
+			});
+
+			// Normal classes should export normally
+			expect(result).toContain("export const normalClass: string;");
+			expect(result).toContain("export const __dts_class: string;");
+
+			// Keywords should use aliased exports (potentially colliding with existing class)
+			expect(result).toContain("declare const __dts_class: string;");
+			expect(result).toContain('export { __dts_class as "class" };');
+
+			// Note: In this edge case, there will be both:
+			// - export const __dts_class (for the actual CSS class named __dts_class)
+			// - declare const __dts_class (for aliasing the keyword "class")
+			// This will cause a TypeScript error, but it's an extremely unlikely edge case
+			// where users are intentionally naming classes with the __dts_ prefix
 		});
 	});
 });
