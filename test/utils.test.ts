@@ -178,7 +178,7 @@ describe("utils", () => {
 			const result = generateDtsContent({
 				classNames: ["test"],
 				options: {
-					camelCase: false,
+					exportLocalsConvention: "as-is",
 					quote: "double",
 					indentStyle: "space",
 					indentSize: 2,
@@ -194,11 +194,11 @@ describe("utils", () => {
 			expect(result).toContain("export const test: string;");
 		});
 
-		test("should fallback to interface when namedExport=true but has keywords", () => {
+		test("should skip keywords when namedExport=true", () => {
 			const result = generateDtsContent({
 				classNames: ["class", "export", "validName"],
 				options: {
-					camelCase: false,
+					exportLocalsConvention: "as-is",
 					quote: "double",
 					indentStyle: "space",
 					indentSize: 2,
@@ -209,19 +209,18 @@ describe("utils", () => {
 				}
 			});
 
-			// Should use interface format because of keywords
-			expect(result).toContain("interface CssExports");
-			expect(result).toContain('"class"');
-			expect(result).toContain('"export"');
-			expect(result).toContain('"validName"');
-			expect(result).toContain("export default cssExports;");
+			// Should only export non-keyword classes
+			expect(result).toContain("export const validName: string;");
+			expect(result).not.toContain("export const class");
+			expect(result).not.toContain("export const export");
+			expect(result).not.toContain("interface");
 		});
 
 		test("should use default export when namedExport=false and no keywords", () => {
 			const result = generateDtsContent({
 				classNames: ["foo", "bar"],
 				options: {
-					camelCase: false,
+					exportLocalsConvention: "as-is",
 					quote: "single",
 					indentStyle: "tab",
 					indentSize: 2,
@@ -243,7 +242,7 @@ describe("utils", () => {
 			const result = generateDtsContent({
 				classNames: ["zebra", "alpha", "beta"],
 				options: {
-					camelCase: false,
+					exportLocalsConvention: "as-is",
 					quote: "double",
 					indentStyle: "space",
 					indentSize: 2,
@@ -257,16 +256,17 @@ describe("utils", () => {
 			const lines = result.split("\n");
 			const exportLines = lines.filter(l => l.startsWith("export const"));
 
+			expect(exportLines.length).toBe(3);
 			expect(exportLines[0]).toContain("alpha");
 			expect(exportLines[1]).toContain("beta");
 			expect(exportLines[2]).toContain("zebra");
 		});
 
-		test("should apply camelCase transformation", () => {
+		test("should apply camelCase transformation with camel-case-only", () => {
 			const result = generateDtsContent({
 				classNames: ["kebab-case-name", "another-class"],
 				options: {
-					camelCase: true,
+					exportLocalsConvention: "camel-case-only",
 					quote: "double",
 					indentStyle: "space",
 					indentSize: 2,

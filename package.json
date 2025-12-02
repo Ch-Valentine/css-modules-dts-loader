@@ -38,7 +38,7 @@
 		"build:watch": "tsc --watch",
 		"clean": "rm -rf dist",
 		"type-check": "tsc --noEmit && tsc --project tsconfig.test.json",
-		"test": "vitest run --coverage",
+		"test": "pnpm build && vitest run --coverage",
 		"test:watch": "vitest",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",

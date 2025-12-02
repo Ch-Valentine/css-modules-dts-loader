@@ -64,7 +64,11 @@ function compileProject({ files, loaderOptions = {} }: CompileProjectOptions): P
 							loader: "css-loader",
 							options: {
 								modules: {
-									namedExport: true
+									// Match css-loader's namedExport with the loader's namedExport option
+									namedExport: loaderOptions.namedExport !== false,
+									// Match exportLocalsConvention or use appropriate default
+									exportLocalsConvention: loaderOptions.exportLocalsConvention ||
+										(loaderOptions.namedExport !== false ? "as-is" : "camel-case-only")
 								}
 							}
 						}
