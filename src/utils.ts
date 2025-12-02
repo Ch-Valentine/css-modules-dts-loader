@@ -1,7 +1,7 @@
 /**
  * Utility functions for CSS Modules DTS loader.
  */
-import { CSS_MODULE_PATTERNS, EXPORT_MARKERS, JS_KEYWORDS, LoaderOptions } from "./constants.js";
+import { CSS_MODULE_PATTERNS, EXPORT_MARKERS, JS_KEYWORDS, LoaderOptions, ExportLocalsConvention } from "./constants.js";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
 /**
@@ -32,7 +32,9 @@ export interface HandleDtsFileParams {
  */
 export interface GenerateDtsContentParams {
     classNames: string[];
-    options: Required<LoaderOptions>;
+    options: Required<Omit<LoaderOptions, "camelCase" | "exportLocalsConvention">> & {
+        exportLocalsConvention: ExportLocalsConvention;
+    };
 }
 
 /**
@@ -78,6 +80,91 @@ export const enforceLFLineSeparators = (text: string): string => typeof text ===
  * ```
  */
 export const toCamelCase = (name: string): string => name.replace(/-([a-z])/g, (_, p1) => p1.toUpperCase());
+
+/**
+ * Transforms class names according to exportLocalsConvention setting.
+ * Matches css-loader's behavior.
+ *
+ * @param classNames - Array of original class names
+ * @param convention - The export locals convention to apply
+ * @returns Array of transformed class names (may include duplicates if convention exports both forms)
+ *
+ * @example
+ * ```ts
+ * applyExportLocalsConvention(["foo-bar"], "as-is")          // ["foo-bar"]
+ * applyExportLocalsConvention(["foo-bar"], "camel-case")     // ["foo-bar", "fooBar"]
+ * applyExportLocalsConvention(["foo-bar"], "camel-case-only") // ["fooBar"]
+ * ```
+ */
+export function applyExportLocalsConvention(
+	classNames: string[],
+	convention: ExportLocalsConvention
+): string[] {
+	const result: string[] = [];
+	const seen = new Set<string>();
+
+	for (const className of classNames) {
+		switch (convention) {
+			case "as-is":
+				// Export exactly as-is
+				if (!seen.has(className)) {
+					result.push(className);
+					seen.add(className);
+				}
+				break;
+
+			case "camel-case": {
+				// Export both original and camelCase
+				if (!seen.has(className)) {
+					result.push(className);
+					seen.add(className);
+				}
+				const camelCased = toCamelCase(className);
+				if (!seen.has(camelCased) && camelCased !== className) {
+					result.push(camelCased);
+					seen.add(camelCased);
+				}
+				break;
+			}
+
+			case "camel-case-only": {
+				// Export only camelCase
+				const camelCased = toCamelCase(className);
+				if (!seen.has(camelCased)) {
+					result.push(camelCased);
+					seen.add(camelCased);
+				}
+				break;
+			}
+
+			case "dashes": {
+				// Export both original and camelCase (same as camel-case)
+				if (!seen.has(className)) {
+					result.push(className);
+					seen.add(className);
+				}
+				const camelCased = toCamelCase(className);
+				if (!seen.has(camelCased) && camelCased !== className) {
+					result.push(camelCased);
+					seen.add(camelCased);
+				}
+				break;
+			}
+
+			case "dashes-only": {
+				// Export only camelCase (same as camel-case-only)
+				const camelCased = toCamelCase(className);
+				if (!seen.has(camelCased)) {
+					result.push(camelCased);
+					seen.add(camelCased);
+				}
+				break;
+			}
+		}
+	}
+
+	return result;
+}
 
 /**
  * Determines the CSS loader version and export format based on source content.
@@ -229,20 +316,19 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  * Generates the content for a .d.ts file based on extracted CSS class names and options.
  *
  * This function performs several transformations:
- * 1. Applies camelCase conversion if enabled
+ * 1. Applies exportLocalsConvention transformation (or legacy camelCase)
  * 2. Sorts class names alphabetically if enabled
  * 3. Checks for JavaScript reserved keywords in class names
  * 4. Chooses appropriate export format based on options and keyword detection
  * 5. Formats the output with custom indentation and quotes
  *
  * Export format selection:
- * - If namedExport=true and no keywords: generates named exports (export const foo: string;)
- * - If namedExport=true but has keywords: falls back to interface + export = (for compatibility)
- * - If namedExport=false: generates interface + default export
+ * - If namedExport=true: generates named exports for non-keyword classes only (keywords are skipped)
+ * - If namedExport=false: generates interface + default export with all classes
  *
  * @param params - Parameters object
  * @param params.classNames - Array of CSS class names extracted from the module
- * @param params.options - Loader options (camelCase, quote, indentStyle, etc.)
+ * @param params.options - Loader options (exportLocalsConvention, quote, indentStyle, etc.)
  * @returns Generated TypeScript declaration file content with trailing newline
  *
  * @example
@@ -250,35 +336,32 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  * // Named exports (no keywords)
  * generateDtsContent({
  *   classNames: ["button", "container"],
- *   options: { namedExport: true, quote: "double", ... }
+ *   options: { namedExport: true, exportLocalsConvention: "as-is", ... }
  * });
  * // Returns:
  * // export const button: string;
  * // export const container: string;
  *
- * // Interface format (with keywords)
+ * // Named exports with keywords (keywords are skipped)
  * generateDtsContent({
  *   classNames: ["class", "button"],
- *   options: { namedExport: true, quote: "double", ... }
+ *   options: { namedExport: true, exportLocalsConvention: "as-is", ... }
  * });
  * // Returns:
- * // interface CssExports {
- * //   "class": string;
- * //   "button": string;
- * // }
- * // export const cssExports: CssExports;
- * // export = cssExports;
+ * // export const button: string;
  * ```
  */
 export function generateDtsContent({ classNames, options }: GenerateDtsContentParams): string {
+	// Apply exportLocalsConvention transformation
+	const transformedClassNames = applyExportLocalsConvention(
+		classNames,
+		options.exportLocalsConvention as ExportLocalsConvention
+	);
 
-	const baseClassNames = options.camelCase
-		? classNames.map(toCamelCase)
-		: classNames;
-
+	// Sort if requested
 	const processedClassNames = options.sort
-		? [...baseClassNames].sort((a, b) => a.localeCompare(b))
-		: baseClassNames;
+		? [...transformedClassNames].sort((a, b) => a.localeCompare(b))
+		: transformedClassNames;
 
 	const quoteChar = options.quote === "single" ? "'" : "\"";
 	const indent = options.indentStyle === "tab"
@@ -291,16 +374,16 @@ export function generateDtsContent({ classNames, options }: GenerateDtsContentPa
 		content.push(...options.banner.split("\n"));
 	}
 
-	// Check if any class names are JS keywords
-	const hasKeywords = processedClassNames.some(cls => JS_KEYWORDS.has(cls));
+	// Separate keywords from non-keywords
+	const nonKeywords = processedClassNames.filter(cls => !JS_KEYWORDS.has(cls));
 
-	// If namedExport is requested but we have keywords, fall back to interface format
-	// because we can't use keywords as named exports (e.g., export const class: string;)
-	const useNamedExport = options.namedExport && !hasKeywords;
-
-	if (useNamedExport) {
-		content.push(...processedClassNames.map(cls => `export const ${cls}: string;`));
+	if (options.namedExport) {
+		// namedExport:true - only export non-keyword classes as named exports
+		// Keywords are skipped because they cannot be used as named exports in JavaScript
+		// Users can still access them via import * as styles and styles["keyword"]
+		content.push(...nonKeywords.map(cls => `export const ${cls}: string;`));
 	} else {
+		// namedExport:false - always use interface format
 		content.push(
 			"interface CssExports {",
 			...processedClassNames.map((cls) => `${indent}${quoteChar}${cls}${quoteChar}: string;`),

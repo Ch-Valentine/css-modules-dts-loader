@@ -91,7 +91,19 @@ export default function cssModuleTypesLoader(this: LoaderContext, source: string
 	});
 
 	// Merge default options with user options
-	const options = { ...DEFAULT_OPTIONS, ...providedOptions };
+	const mergedOptions = { ...DEFAULT_OPTIONS, ...providedOptions };
+
+	// Handle backward compatibility: camelCase -> exportLocalsConvention
+	if (mergedOptions.camelCase !== undefined && mergedOptions.exportLocalsConvention === undefined) {
+		mergedOptions.exportLocalsConvention = mergedOptions.camelCase ? "camel-case-only" : "as-is";
+	}
+
+	// Set exportLocalsConvention default based on namedExport (matching css-loader)
+	if (mergedOptions.exportLocalsConvention === undefined) {
+		mergedOptions.exportLocalsConvention = mergedOptions.namedExport ? "as-is" : "camel-case-only";
+	}
+
+	const options = mergedOptions as Required<LoaderOptions>;
 
 	const classNames = extractClassNames(source);
 

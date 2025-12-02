@@ -243,11 +243,11 @@ describe("css-modules-dts-loader", () => {
 			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
 			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
 
-			// Should contain all class names
-			expect(dtsContent).toContain("class");
-			expect(dtsContent).toContain("export");
-			expect(dtsContent).toContain("import");
-			expect(dtsContent).toContain("validClass");
+			expect(dtsContent).toContain("export const validClass: string;");
+
+			expect(dtsContent).not.toContain("export const class: string;");
+			expect(dtsContent).not.toContain("export const export: string;");
+			expect(dtsContent).not.toContain("export const import: string;");
 		});
 
 		it("should handle JS keyword class names with namedExport=false", async () => {
