@@ -283,6 +283,39 @@ describe("css-modules-dts-loader", () => {
 			expect(dtsContent).toContain('"export"');
 			expect(dtsContent).toContain('"for"');
 		});
+
+		it("should handle mixed keywords and normal classes", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .container {
+            height: var(--ds-color-surface-main);
+          }
+          .title {
+            color: var(--ds-color-text-main);
+          }
+          .class {
+            background-color: var(--ds-color-background-accent);
+          }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: { namedExport: true }
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			// Should export normal classnames as regular named exports
+			expect(dtsContent).toContain("export const container: string;");
+			expect(dtsContent).toContain("export const title: string;");
+
+			// Should export the keyword with aliased export
+			expect(dtsContent).toContain("declare const __dts_class: string;");
+			expect(dtsContent).toContain('export { __dts_class as "class" };');
+		});
 	});
 
 	describe("File Extensions", () => {
