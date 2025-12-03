@@ -318,6 +318,155 @@ describe("css-modules-dts-loader", () => {
 		});
 	});
 
+	describe("Options: keywordPrefix", () => {
+		it("should use default __dts_ prefix for keywords", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .class { color: blue; }
+          .export { color: red; }
+          .validClass { color: black; }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: { namedExport: true }
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			// Should use default __dts_ prefix
+			expect(dtsContent).toContain("declare const __dts_class: string;");
+			expect(dtsContent).toContain("declare const __dts_export: string;");
+			expect(dtsContent).toContain('export { __dts_class as "class" };');
+			expect(dtsContent).toContain('export { __dts_export as "export" };');
+			expect(dtsContent).toContain("export const validClass: string;");
+		});
+
+		it("should use custom keywordPrefix (dts)", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .class { color: blue; }
+          .export { color: red; }
+          .validClass { color: black; }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: {
+					namedExport: true,
+					keywordPrefix: "dts"
+				}
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			// Should use custom prefix
+			expect(dtsContent).toContain("declare const dtsclass: string;");
+			expect(dtsContent).toContain("declare const dtsexport: string;");
+			expect(dtsContent).toContain('export { dtsclass as "class" };');
+			expect(dtsContent).toContain('export { dtsexport as "export" };');
+
+			// Should NOT use default prefix
+			expect(dtsContent).not.toContain("__dts_");
+
+			// Non-keyword class should be normal export
+			expect(dtsContent).toContain("export const validClass: string;");
+		});
+
+		it("should use custom keywordPrefix with underscores", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .import { color: blue; }
+          .button { color: red; }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: {
+					namedExport: true,
+					keywordPrefix: "my_prefix_"
+				}
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			expect(dtsContent).toContain("declare const my_prefix_import: string;");
+			expect(dtsContent).toContain('export { my_prefix_import as "import" };');
+			expect(dtsContent).toContain("export const button: string;");
+		});
+
+		it("should work with keywordPrefix and sort option", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .zebra { color: black; }
+          .class { color: blue; }
+          .alpha { color: green; }
+          .export { color: red; }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: {
+					namedExport: true,
+					keywordPrefix: "dts",
+					sort: true
+				}
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			// Keywords with custom prefix
+			expect(dtsContent).toContain("declare const dtsclass: string;");
+			expect(dtsContent).toContain("declare const dtsexport: string;");
+
+			// Check sorted order of non-keywords
+			const lines = dtsContent.split("\n");
+			const exportLines = lines.filter(l => l.startsWith("export const"));
+			expect(exportLines[0]).toContain("alpha");
+			expect(exportLines[1]).toContain("zebra");
+		});
+
+		it("should not affect interface export mode (namedExport=false)", async () => {
+			const files = {
+				"index.js": "import styles from './styles.module.css';",
+				"styles.module.css": `
+          .class { color: blue; }
+          .export { color: red; }
+        `
+			};
+
+			const { tmpDir } = await compileProject({
+				files,
+				loaderOptions: {
+					namedExport: false,
+					keywordPrefix: "customPrefix"
+				}
+			});
+
+			const dtsContent = readFile(tmpDir, "styles.module.css.d.ts");
+			expect(normalizeLineEndings(dtsContent)).toMatchSnapshot();
+
+			// Interface mode should not use prefix
+			expect(dtsContent).toContain("interface CssExports");
+			expect(dtsContent).toContain('"class"');
+			expect(dtsContent).toContain('"export"');
+			expect(dtsContent).not.toContain("customPrefix");
+			expect(dtsContent).not.toContain("declare const");
+		});
+	});
+
 	describe("File Extensions", () => {
 		// Note: These tests verify that the loader supports different CSS preprocessor extensions
 		// In a real project, you would need sass-loader, less-loader, or stylus-loader installed

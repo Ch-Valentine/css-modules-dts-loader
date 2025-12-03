@@ -205,7 +205,8 @@ describe("utils", () => {
 					sort: false,
 					namedExport: true,
 					mode: "emit",
-					banner: "// Test"
+					banner: "// Test",
+					keywordPrefix: "__dts_"
 				}
 			});
 
@@ -302,7 +303,8 @@ describe("utils", () => {
 					sort: false,
 					namedExport: true,
 					mode: "emit",
-					banner: "// Test"
+					banner: "// Test",
+					keywordPrefix: "__dts_"
 				}
 			});
 
@@ -319,6 +321,139 @@ describe("utils", () => {
 			// - declare const __dts_class (for aliasing the keyword "class")
 			// This will cause a TypeScript error, but it's an extremely unlikely edge case
 			// where users are intentionally naming classes with the __dts_ prefix
+		});
+
+		test("should use custom keywordPrefix (dts) when specified", () => {
+			const result = generateDtsContent({
+				classNames: ["class", "export", "validName"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: false,
+					namedExport: true,
+					mode: "emit",
+					banner: "// Test",
+					keywordPrefix: "dts"
+				}
+			});
+
+			// Should export non-keyword classes normally
+			expect(result).toContain("export const validName: string;");
+
+			// Should use custom prefix for keywords
+			expect(result).toContain("declare const dtsclass: string;");
+			expect(result).toContain("declare const dtsexport: string;");
+			expect(result).toContain('export { dtsclass as "class" };');
+			expect(result).toContain('export { dtsexport as "export" };');
+
+			// Should NOT use default __dts_ prefix
+			expect(result).not.toContain("__dts_class");
+			expect(result).not.toContain("__dts_export");
+		});
+
+		test("should use custom keywordPrefix with underscores", () => {
+			const result = generateDtsContent({
+				classNames: ["class", "import"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: false,
+					namedExport: true,
+					mode: "emit",
+					banner: "// Test",
+					keywordPrefix: "my_prefix_"
+				}
+			});
+
+			expect(result).toContain("declare const my_prefix_class: string;");
+			expect(result).toContain("declare const my_prefix_import: string;");
+			expect(result).toContain('export { my_prefix_class as "class" };');
+			expect(result).toContain('export { my_prefix_import as "import" };');
+		});
+
+		test("should use custom keywordPrefix with camelCase style", () => {
+			const result = generateDtsContent({
+				classNames: ["class", "for"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: false,
+					namedExport: true,
+					mode: "emit",
+					banner: "// Test",
+					keywordPrefix: "dtsKeyword"
+				}
+			});
+
+			expect(result).toContain("declare const dtsKeywordclass: string;");
+			expect(result).toContain("declare const dtsKeywordfor: string;");
+			expect(result).toContain('export { dtsKeywordclass as "class" };');
+			expect(result).toContain('export { dtsKeywordfor as "for" };');
+		});
+
+		test("should not affect interface export mode (namedExport=false)", () => {
+			const result = generateDtsContent({
+				classNames: ["class", "export", "normal"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: false,
+					namedExport: false,
+					mode: "emit",
+					banner: "// Test",
+					keywordPrefix: "customPrefix"
+				}
+			});
+
+			// Interface mode should not use keyword prefix at all
+			expect(result).toContain("interface CssExports");
+			expect(result).toContain('"class"');
+			expect(result).toContain('"export"');
+			expect(result).toContain('"normal"');
+			expect(result).not.toContain("customPrefix");
+			expect(result).not.toContain("declare const");
+		});
+
+		test("should work with sorted keywords using custom prefix", () => {
+			const result = generateDtsContent({
+				classNames: ["zebra", "class", "alpha", "export"],
+				options: {
+					exportLocalsConvention: "as-is",
+					quote: "double",
+					indentStyle: "space",
+					indentSize: 2,
+					sort: true,
+					namedExport: true,
+					mode: "emit",
+					banner: "// Test",
+					keywordPrefix: "dts"
+				}
+			});
+
+			const lines = result.split("\n");
+			const exportLines = lines.filter(l => l.startsWith("export const"));
+			const declareLines = lines.filter(l => l.startsWith("declare const"));
+			const aliasedLines = lines.filter(l => l.startsWith("export {"));
+
+			// Normal classes should be sorted
+			expect(exportLines[0]).toContain("alpha");
+			expect(exportLines[1]).toContain("zebra");
+
+			// Keywords should use custom prefix
+			expect(declareLines).toHaveLength(2);
+			expect(declareLines[0]).toContain("dtsclass");
+			expect(declareLines[1]).toContain("dtsexport");
+
+			expect(aliasedLines[0]).toContain('dtsclass as "class"');
+			expect(aliasedLines[1]).toContain('dtsexport as "export"');
 		});
 	});
 });

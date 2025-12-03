@@ -94,6 +94,7 @@ module.exports = {
 | ------------------------ | --------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `exportLocalsConvention` | `"as-is"` \| `"camel-case"` \| `"camel-case-only"` \| `"dashes"` \| `"dashes-only"` | See description    | How to transform class names. Defaults based on `namedExport`: `"as-is"` if `true`, `"camel-case-only"` if `false`. Matches css-loader's option.                   |
 | `namedExport`            | `boolean`                                                             | `true`             | When `true`, generates named exports (`export const foo: string;`). When `false`, generates an interface with default export. Should match css-loader's setting.    |
+| `keywordPrefix`          | `string`                                                              | `"__dts_"`         | Prefix used for aliased exports of JavaScript reserved keywords (e.g., `class`, `export`). Must be a valid JavaScript identifier. Only applies when `namedExport` is `true`. |
 | `quote`                  | `"single"` \| `"double"`                                              | `"double"`         | Quote style used for interface properties when `namedExport` is `false`.                                                                                            |
 | `indentStyle`            | `"tab"` \| `"space"`                                                  | `"space"`          | Indentation style for interface properties.                                                                                                                          |
 | `indentSize`             | `number`                                                              | `2`                | Number of spaces for indentation when `indentStyle` is `"space"`.                                                                                                   |
@@ -122,6 +123,7 @@ When using `namedExport: true`, JavaScript reserved keywords (like `class`, `exp
 - Keywords are exported using **aliased exports** to provide full type safety
 - Non-keyword classes are exported normally as named exports
 - Keywords are accessible via namespace import with full type safety
+- The prefix for aliased exports can be customized using the `keywordPrefix` option
 
 **Example:**
 
@@ -131,7 +133,7 @@ When using `namedExport: true`, JavaScript reserved keywords (like `class`, `exp
 .container { padding: 10px; }
 ```
 
-Generated with `namedExport: true`:
+Generated with `namedExport: true` and default `keywordPrefix`:
 ```ts
 // styles.module.css.d.ts
 export const container: string;
@@ -140,14 +142,28 @@ declare const __dts_class: string;
 export { __dts_class as "class" };
 ```
 
+Generated with `namedExport: true` and `keywordPrefix: "dts"`:
+```ts
+// styles.module.css.d.ts
+export const container: string;
+
+declare const dtsclass: string;
+export { dtsclass as "class" };
+```
+
 Usage in TypeScript:
 ```ts
 import * as styles from './styles.module.css';
 
 // Both are fully type-safe:
 styles.container;  // ✅ Type-safe
-styles["class"];   // ✅ Type-safe via aliased export
+styles.class;      // ✅ Type-safe via aliased export
 ```
+
+**Why customize `keywordPrefix`?**
+- **Linter compatibility**: Some ESLint configurations flag identifiers starting with `__` (double underscore)
+- **Naming conventions**: Match your project's naming standards
+- **Readability**: Use a prefix that's clearer in your codebase (e.g., `dts`, `css_`, `module_`)
 
 **Note:** With `namedExport: false`, all classes (including keywords) are included in the interface, so there's no difference in behavior for keywords.
 
@@ -185,7 +201,19 @@ import * as styles from './styles.module.css';
 
 styles.button;
 styles.container;
-styles["class"]; // Type-safe via aliased export
+styles.class; // Type-safe via aliased export
+
+// Or
+
+import {
+	button,
+	container,
+	class as notReservedJsKeyword
+} from './styles.module.css';
+
+<div className={notReservedJsKeyword}>
+	No conflicts with JS keywords!
+</div>
 ```
 
 #### With `namedExport: false`
