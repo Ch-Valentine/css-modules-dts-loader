@@ -34,6 +34,7 @@ export interface GenerateDtsContentParams {
     classNames: string[];
     options: Required<Omit<LoaderOptions, "camelCase" | "exportLocalsConvention">> & {
         exportLocalsConvention: ExportLocalsConvention;
+        keywordPrefix: string;
     };
 }
 
@@ -338,7 +339,7 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  *
  * @param params - Parameters object
  * @param params.classNames - Array of CSS class names extracted from the module
- * @param params.options - Loader options (exportLocalsConvention, quote, indentStyle, etc.)
+ * @param params.options - Loader options (exportLocalsConvention, quote, indentStyle, keywordPrefix, etc.)
  * @returns Generated TypeScript declaration file content with trailing newline
  *
  * @example
@@ -346,22 +347,22 @@ export function handleDtsFile({ dtsFilePath, dtsContent, mode, logger: _logger, 
  * // Named exports (no keywords)
  * generateDtsContent({
  *   classNames: ["button", "container"],
- *   options: { namedExport: true, exportLocalsConvention: "as-is", ... }
+ *   options: { namedExport: true, exportLocalsConvention: "as-is", keywordPrefix: "__dts_", ... }
  * });
  * // Returns:
  * // export const button: string;
  * // export const container: string;
  *
- * // Named exports with keywords (keywords use aliased exports)
+ * // Named exports with keywords (keywords use aliased exports with custom prefix)
  * generateDtsContent({
  *   classNames: ["class", "button"],
- *   options: { namedExport: true, exportLocalsConvention: "as-is", ... }
+ *   options: { namedExport: true, exportLocalsConvention: "as-is", keywordPrefix: "dts", ... }
  * });
  * // Returns:
  * // export const button: string;
  * //
- * // declare const __dts_class: string;
- * // export { __dts_class as "class" };
+ * // declare const dtsclass: string;
+ * // export { dtsclass as "class" };
  * ```
  */
 export function generateDtsContent({ classNames, options }: GenerateDtsContentParams): string {
@@ -396,11 +397,12 @@ export function generateDtsContent({ classNames, options }: GenerateDtsContentPa
 		content.push(...nonKeywords.map(cls => `export const ${cls}: string;`));
 
 		// For keywords, use aliased exports to provide type safety
-		// declare const __dts_class: string; export { __dts_class as "class" };
+		// declare const {prefix}class: string; export { {prefix}class as "class" };
 		if (keywords.length > 0) {
 			content.push("");
-			content.push(...keywords.map(cls => `declare const __dts_${cls}: string;`));
-			content.push(...keywords.map(cls => `export { __dts_${cls} as "${cls}" };`));
+			const prefix = options.keywordPrefix;
+			content.push(...keywords.map(cls => `declare const ${prefix}${cls}: string;`));
+			content.push(...keywords.map(cls => `export { ${prefix}${cls} as "${cls}" };`));
 		}
 	} else {
 		// namedExport:false - always use interface format

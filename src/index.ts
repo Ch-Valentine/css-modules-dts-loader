@@ -103,6 +103,20 @@ export default function cssModuleTypesLoader(this: LoaderContext, source: string
 		mergedOptions.exportLocalsConvention = mergedOptions.namedExport ? "as-is" : "camel-case-only";
 	}
 
+	// Validate keywordPrefix format
+	if (mergedOptions.keywordPrefix !== undefined) {
+		const keywordPrefix = mergedOptions.keywordPrefix;
+		// Must be a valid JavaScript identifier start
+		if (!/^[a-zA-Z_$][\w$]*$/.test(keywordPrefix)) {
+			this.emitError(new Error(
+				`Invalid keywordPrefix: "${keywordPrefix}". ` +
+				"The prefix must be a valid JavaScript identifier (start with letter, _, or $, " +
+				"followed by letters, digits, _, or $)."
+			));
+			return source;
+		}
+	}
+
 	const options = mergedOptions as Required<LoaderOptions>;
 
 	const classNames = extractClassNames(source);
