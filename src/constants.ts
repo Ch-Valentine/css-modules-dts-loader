@@ -1,6 +1,3 @@
-/**
- * Export locals convention types matching css-loader
- */
 export type ExportLocalsConvention =
 	| "as-is"
 	| "camel-case"
@@ -8,9 +5,6 @@ export type ExportLocalsConvention =
 	| "dashes"
 	| "dashes-only";
 
-/**
- * Loader options interface
- */
 export interface LoaderOptions {
 	/** @deprecated Use exportLocalsConvention instead. Will be removed in v2.0 */
 	camelCase?: boolean;
@@ -24,34 +18,21 @@ export interface LoaderOptions {
 	banner?: string;
 }
 
-/**
- * Export format marker interface
- */
 export interface ExportMarker {
 	pattern: string;
 	isNamedExport: boolean;
 }
 
-/**
- * CSS module pattern interface
- */
 export interface CssModulePatterns {
 	OBJECT_EXPORT: RegExp;
 	NAMED_EXPORT: RegExp;
 	ALIASED_EXPORT: RegExp;
 }
-
-/**
- * JSON Schema property definition
- */
 interface SchemaProperty {
 	type: "boolean" | "string" | "number";
 	enum?: string[];
 }
 
-/**
- * JSON Schema definition for validation
- */
 interface SchemaDefinition {
 	type: "object";
 	properties: Record<string, SchemaProperty>;
@@ -65,7 +46,6 @@ export const STYLE_EXT_REGEX = /\.(css|postcss|pcss|scss|sass|less|styl|sss)$/;
 
 /**
  * Schema for loader options validation.
- * Conforms to JSON Schema Draft-07 specification for use with schema-utils.
  */
 export const SCHEMA: SchemaDefinition = {
 	type: "object",

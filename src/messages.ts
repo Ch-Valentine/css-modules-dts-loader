@@ -1,7 +1,3 @@
-/**
- * Error and info message templates for the loader.
- */
-
 export const ERRORS = {
 	FILE_NOT_FOUND: (filePath: string): string =>
 		`CSS DTS Loader: File "${filePath}" not found. Run build in "emit" mode to create it.`,

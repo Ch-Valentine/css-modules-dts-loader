@@ -177,11 +177,21 @@ export function applyExportLocalsConvention(
  * @internal
  */
 function detectExportFormat(source: string): { startIndex: number; isNamedExport: boolean } {
-	const match = EXPORT_MARKERS.find(marker => source.includes(marker.pattern));
+	// Find the earliest export marker in the source
+	let earliestIndex = -1;
+	let earliestMarker: typeof EXPORT_MARKERS[0] | null = null;
+
+	for (const marker of EXPORT_MARKERS) {
+		const index = source.indexOf(marker.pattern);
+		if (index !== -1 && (earliestIndex === -1 || index < earliestIndex)) {
+			earliestIndex = index;
+			earliestMarker = marker;
+		}
+	}
 
 	return {
-		startIndex: match ? source.indexOf(match.pattern) : -1,
-		isNamedExport: match?.isNamedExport || false
+		startIndex: earliestIndex,
+		isNamedExport: earliestMarker?.isNamedExport || false
 	};
 }
 
