@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.4.0...v1.4.1) (2025-12-03)
+
+
+### Bug Fixes
+
+* fix generating types for mixed classes (reserved keywords and other) ([e446fca](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/e446fcaa48e0bb914f65a05c1450b0beffc551da))
+
 # [1.4.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.3.0...v1.4.0) (2025-12-02)
 
 
