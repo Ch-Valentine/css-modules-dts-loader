@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.4.1...v1.5.0) (2025-12-03)
+
+
+### Features
+
+* added ability to provide keywordPrefix ([291b84e](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/291b84efb5af844a0d007226cde5f3efb5c412d9))
+
 ## [1.4.1](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.4.0...v1.4.1) (2025-12-03)
 
 

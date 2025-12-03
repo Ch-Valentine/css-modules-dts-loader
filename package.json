@@ -1,6 +1,6 @@
 {
 	"name": "css-modules-dts-loader",
-	"version": "1.4.1",
+	"version": "1.5.0",
 	"description": "A Webpack loader that generates TypeScript declaration files (.d.ts) for CSS modules.",
 	"type": "module",
 	"main": "dist/index.js",
