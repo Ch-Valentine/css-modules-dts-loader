@@ -185,7 +185,8 @@ describe("utils", () => {
 					sort: false,
 					namedExport: true,
 					mode: "emit",
-					banner: "// Custom banner\n// Line 2"
+					banner: "// Custom banner\n// Line 2",
+					keywordPrefix: "__dts_"
 				}
 			});
 
@@ -237,7 +238,8 @@ describe("utils", () => {
 					sort: false,
 					namedExport: false,
 					mode: "emit",
-					banner: "// Test"
+					banner: "// Test",
+					keywordPrefix: "__dts_"
 				}
 			});
 
@@ -259,7 +261,8 @@ describe("utils", () => {
 					sort: true,
 					namedExport: true,
 					mode: "emit",
-					banner: "// Test"
+					banner: "// Test",
+					keywordPrefix: "__dts_"
 				}
 			});
 
@@ -283,7 +286,8 @@ describe("utils", () => {
 					sort: false,
 					namedExport: true,
 					mode: "emit",
-					banner: "// Test"
+					banner: "// Test",
+					keywordPrefix: "__dts_"
 				}
 			});
 
