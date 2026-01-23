@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.5.0...v1.5.1) (2026-01-23)
+
+
+### Bug Fixes
+
+* resolve CI configuration issues and update dependencies ([ce8ca5e](https://github.com/Ch-Valentine/css-modules-dts-loader/commit/ce8ca5e9cb6e600de5cc02fd3b3d2175b630c1ac))
+
 # [1.5.0](https://github.com/Ch-Valentine/css-modules-dts-loader/compare/v1.4.1...v1.5.0) (2025-12-03)
 
 
